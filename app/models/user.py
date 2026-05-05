@@ -18,6 +18,6 @@ class Customer(UserBase, table=True):
 
 class Employee(UserBase, table=True):
     __tablename__ = "employees"
-    
+
     role: str = Field(nullable=False)
- 
+    unit_id: int | None = Field(default=None, foreign_key="units.id", nullable=True)

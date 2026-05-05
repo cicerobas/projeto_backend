@@ -4,7 +4,7 @@ from fastapi import Depends
 
 from app.core.config import get_settings
 from app.core.security import get_password_hash
-from app.models.user import Employee
+from app import models
 
 settings = get_settings()
 
@@ -28,10 +28,10 @@ SessionDep = Annotated[Session, Depends(get_session)]
 def seed_db():
     with Session(engine) as session:
         admin = session.exec(
-            select(Employee).where(Employee.email == settings.ADMIN_EMAIL)
+            select(models.Employee).where(models.Employee.email == settings.ADMIN_EMAIL)
         ).one_or_none()
         if not admin:
-            admin = Employee(
+            admin = models.Employee(
                 name="Admin",
                 email=settings.ADMIN_EMAIL,
                 password_hash=get_password_hash(settings.ADMIN_PASSWORD),
