@@ -31,5 +31,5 @@ class UnitUpdate(UnitBase):
         return v
 
 
-class UnitPublic(UnitBase):
+class UnitRead(UnitBase):
     id: int
