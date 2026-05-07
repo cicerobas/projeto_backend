@@ -8,7 +8,7 @@ from app.services.auth import get_current_user
 router = APIRouter(prefix="/user", tags=["user"])
 
 
-@router.post("/customers/", response_model=CustomerRead)
+@router.post("/customers/", response_model=CustomerRead, status_code=201)
 async def customer_create(customer_create: CustomerCreate, session: SessionDep):
     existing_customer = get_user_by_email(session, customer_create.email)
     if existing_customer:
@@ -18,7 +18,7 @@ async def customer_create(customer_create: CustomerCreate, session: SessionDep):
     return customer
 
 
-@router.post("/employees/", response_model=EmployeeRead)
+@router.post("/employees/", response_model=EmployeeRead, status_code=201)
 async def employee_create(
     employee_create: EmployeeCreate,
     session: SessionDep,
@@ -26,7 +26,7 @@ async def employee_create(
 ):
     if current_user.role != "admin" and current_user.role != "manager":
         raise HTTPException(status_code=403, detail="Acesso negado")
-    
+
     existing_employee = get_user_by_email(session, employee_create.email)
     if existing_employee:
         raise HTTPException(status_code=400, detail="Email já cadastrado")
