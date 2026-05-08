@@ -1,10 +1,10 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class UnitBase(BaseModel):
-    name: str
-    cnpj: str
-    address: str
+    name: str = Field(..., max_length=100)
+    cnpj: str = Field(..., max_length=14)
+    address: str = Field(..., max_length=200)
 
     @field_validator("cnpj")
     @classmethod
@@ -19,9 +19,9 @@ class UnitCreate(UnitBase):
 
 
 class UnitUpdate(UnitBase):
-    name: str | None = None
-    cnpj: str | None = None
-    address: str | None = None
+    name: str | None = Field(None, max_length=100)
+    cnpj: str | None = Field(None, max_length=14)
+    address: str | None = Field(None, max_length=200)
 
     @field_validator("cnpj")
     @classmethod

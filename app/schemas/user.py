@@ -1,6 +1,6 @@
 from uuid import UUID
 from enum import Enum
-from pydantic import BaseModel, field_validator, EmailStr
+from pydantic import BaseModel, field_validator, EmailStr, Field
 
 
 class UserRole(str, Enum):
@@ -10,24 +10,17 @@ class UserRole(str, Enum):
 
 
 class UserBase(BaseModel):
-    name: str
-    email: EmailStr
+    name: str = Field(..., min_length=3, max_length=100)
+    email: EmailStr = Field(..., max_length=100)
 
 
 class UserCreate(UserBase):
-    password: str
-
-    @field_validator("password")
-    @classmethod
-    def password_minimal_size(cls, v: str):
-        if len(v) < 5:
-            raise ValueError("A senha deve ser maior que 5 caracteres.")
-        return v
+    password: str = Field(..., min_length=5, max_length=50)
 
 
 class CustomerCreate(UserCreate):
-    cpf: str
-    address: str | None = None
+    cpf: str = Field(..., max_length=11)
+    address: str | None = Field(None, max_length=200)
 
     @field_validator("cpf")
     @classmethod
@@ -37,9 +30,28 @@ class CustomerCreate(UserCreate):
         return v
 
 
+class CustomerUpdate(BaseModel):
+    name: str | None = Field(None, min_length=3, max_length=100)
+    email: EmailStr | None = Field(None, max_length=100)
+    password: str | None = Field(None, min_length=5, max_length=50)
+    address: str | None = Field(None, max_length=200)
+
+
 class EmployeeCreate(UserCreate):
-    role: UserRole
+    role: UserRole = Field(
+        ..., description="O cargo do funcionário (employee, manager ou admin)."
+    )
     unit_id: int
+
+
+class EmployeeUpdate(BaseModel):
+    name: str | None = Field(None, min_length=3, max_length=100)
+    email: EmailStr | None = Field(None, max_length=100)
+    password: str | None = Field(None, min_length=5, max_length=50)
+    role: UserRole | None = Field(
+        None, description="O cargo do funcionário (employee, manager ou admin)."
+    )
+    unit_id: int | None
 
 
 class EmployeeRead(UserBase):
@@ -52,8 +64,3 @@ class CustomerRead(UserBase):
     id: UUID
     cpf: str
     address: str | None = None
-
-
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str

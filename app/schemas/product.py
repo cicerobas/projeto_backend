@@ -1,17 +1,17 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class ProductBase(BaseModel):
-    name: str
-    price: float
-    description: str | None = None
+    name: str = Field(..., max_length=100)
+    price: float = Field(
+        ..., gt=0, description="Preço em reais, deve ser um valor positivo."
+    )
+    description: str | None = Field(None, max_length=300)
 
     @field_validator("price")
     @classmethod
-    def price_must_be_positive(cls, v: float):
-        if v <= 0:
-            raise ValueError("O preço deve ser um valor positivo.")
-        return v
+    def round_price(cls, v):
+        return round(v, 2)
 
 
 class ProductCreate(ProductBase):
@@ -23,13 +23,15 @@ class ProductRead(ProductBase):
 
 
 class ProductUpdate(BaseModel):
-    name: str | None = None
-    price: float | None = None
-    description: str | None = None
+    name: str | None = Field(None, max_length=100)
+    price: float | None = Field(
+        None, gt=0, description="Preço em reais, deve ser um valor positivo."
+    )
+    description: str | None = Field(None, max_length=300)
 
     @field_validator("price")
     @classmethod
-    def price_must_be_positive(cls, v: float | None):
-        if v is not None and v <= 0:
-            raise ValueError("O preço deve ser um valor positivo.")
+    def round_price(cls, v):
+        if v is not None:
+            return round(v, 2)
         return v

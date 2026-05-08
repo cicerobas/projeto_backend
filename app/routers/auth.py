@@ -1,16 +1,16 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 
 from app.core.database import SessionDep
 from app.core.security import create_access_token
-from app.schemas.user import UserLogin
 from app.services.auth import authenticate_user
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["Autenticação"])
 
 
-@router.post("/token")
-async def login(session: SessionDep, login_data: UserLogin):
-    user = await authenticate_user(session, login_data.email, login_data.password)
+@router.post("/token", summary="Obter token de acesso")
+async def login(session: SessionDep, form_data: OAuth2PasswordRequestForm = Depends()):
+    user = await authenticate_user(session, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=401,

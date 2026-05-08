@@ -12,7 +12,12 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    lifespan=lifespan,
+    title="API Raizes do Nordeste",
+    version="0.1.0",
+    contact={"name": "Cicero Simões", "email": "cbruno.dev@gmail.com"},
+)
 app.include_router(auth.router)
 app.include_router(unit.router)
 app.include_router(user.router)

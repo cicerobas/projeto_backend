@@ -1,7 +1,7 @@
 [project]
 name = "projeto-backend"
 version = "0.1.0"
-description = "Add your description here"
+description = "Projeto Backend - Raizes do Nordeste"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
