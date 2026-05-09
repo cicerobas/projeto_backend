@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.core.database import SessionDep
 from app.crud import inventory as inventory_crud
 from app.schemas.inventory import InventoryCreate, InventoryRead, InventoryUpdate
-from app.services.auth import get_current_user
+from app.services.auth import require_roles
 from app.services import inventory as inventory_service
 
 router = APIRouter(prefix="/inventories", tags=["Estoques"])
@@ -18,15 +18,8 @@ router = APIRouter(prefix="/inventories", tags=["Estoques"])
 async def inventory_create(
     inventory_create: InventoryCreate,
     session: SessionDep,
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_roles("employee", "manager", "admin")),
 ):
-    if (
-        current_user.role != "manager"
-        and current_user.role != "employee"
-        and current_user.role != "admin"
-    ):
-        raise HTTPException(status_code=403, detail="Acesso negado")
-
     inventory = inventory_service.create_inventory(session, inventory_create)
     return inventory
 
@@ -40,15 +33,8 @@ async def inventory_update(
     inventory_id: int,
     inventory_update: InventoryUpdate,
     session: SessionDep,
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_roles("employee", "manager", "admin")),
 ):
-    if (
-        current_user.role != "manager"
-        and current_user.role != "employee"
-        and current_user.role != "admin"
-    ):
-        raise HTTPException(status_code=403, detail="Acesso negado")
-
     inventory = inventory_crud.update_inventory(session, inventory_id, inventory_update)
     if not inventory:
         raise HTTPException(status_code=404, detail="Inventário não encontrado")
@@ -62,15 +48,8 @@ async def inventory_update(
 async def inventory_delete(
     inventory_id: int,
     session: SessionDep,
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_roles("employee", "manager", "admin")),
 ):
-    if (
-        current_user.role != "manager"
-        and current_user.role != "employee"
-        and current_user.role != "admin"
-    ):
-        raise HTTPException(status_code=403, detail="Acesso negado")
-
     success = inventory_crud.delete_inventory(session, inventory_id)
     if not success:
         raise HTTPException(status_code=404, detail="Inventário não encontrado")

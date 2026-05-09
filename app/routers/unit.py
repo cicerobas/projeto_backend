@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.core.database import SessionDep
 from app.crud import unit as unit_crud
 from app.schemas.unit import UnitCreate, UnitRead, UnitUpdate
-from app.services.auth import get_current_user
+from app.services.auth import require_roles
 
 router = APIRouter(prefix="/units", tags=["Unidades"])
 
@@ -17,11 +17,8 @@ router = APIRouter(prefix="/units", tags=["Unidades"])
 async def unit_create(
     unit_create: UnitCreate,
     session: SessionDep,
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_roles("admin")),
 ):
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Acesso negado")
-
     unit = unit_crud.create_unit(session, unit_create)
     return unit
 
@@ -33,11 +30,8 @@ async def unit_update(
     unit_id: int,
     unit_update: UnitUpdate,
     session: SessionDep,
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_roles("admin")),
 ):
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Acesso negado")
-
     unit = unit_crud.update_unit(session, unit_id, unit_update)
     if not unit:
         raise HTTPException(status_code=404, detail="Unidade não encontrada")
@@ -49,11 +43,8 @@ async def unit_update(
 async def unit_delete(
     unit_id: int,
     session: SessionDep,
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_roles("admin")),
 ):
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Acesso negado")
-
     success = unit_crud.delete_unit(session, unit_id)
     if not success:
         raise HTTPException(status_code=404, detail="Unidade não encontrada")

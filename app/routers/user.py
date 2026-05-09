@@ -10,8 +10,9 @@ from app.schemas.user import (
     CustomerUpdate,
     EmployeeCreate,
     EmployeeRead,
+    EmployeeUpdate,
 )
-from app.services.auth import get_current_user
+from app.services.auth import get_current_user, require_roles
 
 router = APIRouter(prefix="/user", tags=["Usuários"])
 
@@ -72,17 +73,43 @@ async def customer_delete(
 async def employee_create(
     employee_create: EmployeeCreate,
     session: SessionDep,
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_roles("admin", "manager")),
 ):
-
-    if not hasattr(current_user, "role") or (
-        current_user.role != "admin" and current_user.role != "manager"
-    ):
-        raise HTTPException(status_code=403, detail="Acesso negado")
-
     existing_employee = user_crud.get_user_by_email(session, employee_create.email)
     if existing_employee:
         raise HTTPException(status_code=400, detail="Email já cadastrado")
 
     employee = await user_crud.create_employee(session, employee_create)
     return employee
+
+
+@router.patch(
+    "/employees/{employee_id}",
+    response_model=EmployeeRead,
+    summary="Atualizar dados do Funcionário",
+)
+async def employee_update(
+    employee_id: UUID,
+    employee_update: EmployeeUpdate,
+    session: SessionDep,
+    current_user=Depends(require_roles("admin", "manager")),
+):
+    employee = await user_crud.update_employee(session, employee_id, employee_update)
+    if not employee:
+        raise HTTPException(status_code=404, detail="Funcionário não encontrado")
+    return employee
+
+
+@router.delete(
+    "/employees/{employee_id}",
+    status_code=204,
+    summary="Excluir funcionário",
+)
+async def employee_delete(
+    employee_id: UUID,
+    session: SessionDep,
+    current_user=Depends(require_roles("admin", "manager")),
+):
+    success = await user_crud.delete_employee(session, employee_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Funcionário não encontrado")

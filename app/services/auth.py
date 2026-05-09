@@ -43,3 +43,11 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+def require_roles(*allowed_roles: str):
+    def dependency(current_user=Depends(get_current_user)):
+        user_role = getattr(current_user, "role", None)
+        if user_role not in allowed_roles:
+            raise HTTPException(status_code=403, detail="Acesso negado")
+        return current_user
+    return dependency

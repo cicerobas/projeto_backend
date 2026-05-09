@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.core.database import SessionDep
 from app.crud import product as product_crud
 from app.schemas.product import ProductCreate, ProductRead, ProductUpdate
-from app.services.auth import get_current_user
+from app.services.auth import require_roles
 
 router = APIRouter(prefix="/products", tags=["Produtos"])
 
@@ -14,11 +14,8 @@ router = APIRouter(prefix="/products", tags=["Produtos"])
 async def product_create(
     product_create: ProductCreate,
     session: SessionDep,
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_roles("manager", "admin")),
 ):
-    if current_user.role != "manager" and current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Acesso negado")
-
     product = product_crud.create_product(session, product_create)
     return product
 
@@ -28,11 +25,8 @@ async def product_update(
     product_id: int,
     product_update: ProductUpdate,
     session: SessionDep,
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_roles("manager", "admin")),
 ):
-    if current_user.role != "manager" and current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Acesso negado")
-
     product = product_crud.update_product(session, product_id, product_update)
     if not product:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
@@ -44,11 +38,8 @@ async def product_update(
 async def product_delete(
     product_id: int,
     session: SessionDep,
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_roles("manager", "admin")),
 ):
-    if current_user.role != "manager" and current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Acesso negado")
-
     success = product_crud.delete_product(session, product_id)
     if not success:
         raise HTTPException(status_code=404, detail="Produto não encontrado")

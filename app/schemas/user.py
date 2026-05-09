@@ -51,7 +51,7 @@ class EmployeeUpdate(BaseModel):
     role: UserRole | None = Field(
         None, description="O cargo do funcionário (employee, manager ou admin)."
     )
-    unit_id: int | None
+    unit_id: int | None = Field(None)
 
 
 class EmployeeRead(UserBase):
