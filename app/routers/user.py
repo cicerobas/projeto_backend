@@ -64,6 +64,19 @@ async def customer_delete(
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
 
 
+@router.get(
+    "customers/me", response_model=CustomerRead, summary="Obter dados do cliente logado"
+)
+async def get_current_customer(
+    session: SessionDep,
+    current_user=Depends(get_current_user),
+):
+    customer = await user_crud.get_customer(session, current_user.id)
+    if not customer:
+        raise HTTPException(status_code=404, detail="Cliente não encontrado")
+    return customer
+
+
 @router.post(
     "/employees/",
     response_model=EmployeeRead,

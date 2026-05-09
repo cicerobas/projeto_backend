@@ -53,6 +53,12 @@ async def delete_customer(session: Session, customer_id: UUID) -> bool:
     return True
 
 
+def get_customer(session: Session, customer_id: UUID) -> Customer | None:
+    return session.get(Customer, customer_id)
+
+def get_customer_by_cpf(session: Session, cpf: str) -> Customer | None:
+    return session.exec(select(Customer).where(Customer.cpf == cpf)).one_or_none()
+
 async def create_employee(
     session: Session, employee_create: EmployeeCreate
 ) -> Employee:
