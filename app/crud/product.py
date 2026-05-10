@@ -40,5 +40,8 @@ def delete_product(session: Session, product_id: int) -> bool:
 def get_product_by_id(session: Session, product_id: int) -> Product | None:
     return session.get(Product, product_id)
 
-def get_all_products(session: Session) -> list[Product]:
-    return session.exec(select(Product)).all()
+
+def get_all_products(
+    session: Session, offset: int = 0, limit: int = 10
+) -> list[Product]:
+    return session.exec(select(Product).offset(offset).limit(limit)).all()

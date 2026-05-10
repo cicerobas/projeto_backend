@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.database import SessionDep
 from app.crud import product as product_crud
@@ -57,6 +57,10 @@ async def product_read(product_id: int, session: SessionDep):
 
 
 @router.get("/", response_model=list[ProductRead], summary="Listar todos os produtos")
-async def product_list(session: SessionDep):
-    products = product_crud.get_all_products(session)
+async def product_list(
+    session: SessionDep,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=100),
+):
+    products = product_crud.get_all_products(session, offset, limit)
     return products

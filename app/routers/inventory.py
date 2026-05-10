@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.database import SessionDep
 from app.crud import inventory as inventory_crud
@@ -69,8 +69,15 @@ async def inventory_read(inventory_id: int, session: SessionDep):
 
 
 @router.get(
-    "/", response_model=list[InventoryRead], summary="Listar estoques de uma unidade"
+    "/unit/{unit_id}",
+    response_model=list[InventoryRead],
+    summary="Listar estoques de uma unidade",
 )
-async def inventory_list_by_unit(unit_id: int, session: SessionDep):
-    inventories = inventory_crud.get_inventories_by_unit_id(session, unit_id)
+async def inventory_list_by_unit(
+    unit_id: int,
+    session: SessionDep,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=100),
+):
+    inventories = inventory_crud.get_inventories_by_unit_id(session, unit_id, offset, limit)
     return inventories

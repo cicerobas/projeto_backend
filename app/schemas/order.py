@@ -66,6 +66,7 @@ class OrderCreateInternal(OrderCreate):
 
 class OrderRead(OrderBase):
     id: int
+    status: OrderStatus
     total_price: float = Field(..., gt=0, description="Preço total do pedido em reais.")
     items: list[OrderItemCreate] = Field(
         ..., description="Lista de itens que compõem o pedido."
@@ -73,5 +74,5 @@ class OrderRead(OrderBase):
     created_at: str = Field(..., description="Data e hora de criação do pedido.")
 
 
-class OrderUpdate(BaseModel):
-    status: OrderStatus | None = Field(None, description="Status atual do pedido.")
+class OrderUpdateStatus(BaseModel):
+    status: OrderStatus

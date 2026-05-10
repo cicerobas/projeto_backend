@@ -4,9 +4,17 @@ from sqlmodel import Session
 from app.crud import order as order_crud
 from app.models.order import Order
 from app.models.user import Customer, Employee
-from app.schemas.order import OrderCreate, OrderCreateInternal, OrderCreateTotem
+from app.schemas.order import (
+    OrderCreate,
+    OrderCreateInternal,
+    OrderCreateTotem,
+    OrderStatus,
+)
+from app.schemas.inventory import InventoryUpdate
 from app.crud import user as user_crud
 from app.crud import product as product_crud
+from app.crud import inventory as inventory_crud
+from app.crud import unit as unit_crud
 
 
 def check_order_items(session: Session, order_data: OrderCreateInternal):
@@ -17,6 +25,26 @@ def check_order_items(session: Session, order_data: OrderCreateInternal):
                 status_code=404,
                 detail=f"Produto com ID {item.product_id} não encontrado.",
             )
+        inventory = inventory_crud.get_inventory_by_product_and_unit(
+            session, item.product_id, order_data.unit_id
+        )
+        if (
+            not inventory
+            or (inventory.total_quantity - inventory.reserved_quantity) < item.quantity
+        ):
+            unit = unit_crud.get_unit_by_id(session, order_data.unit_id)
+            raise HTTPException(
+                status_code=400,
+                detail=f"Estoque insuficiente para o produto: {product.name} na unidade {unit.name}.",
+            )
+
+        inventory_crud.update_inventory(
+            session,
+            inventory.id,
+            InventoryUpdate(
+                reserved_quantity=inventory.reserved_quantity + item.quantity
+            ),
+        )
 
 
 def create_order(
@@ -82,3 +110,40 @@ def create_order_totem(
 
     check_order_items(session, order_internal)
     return order_crud.create_order(session, order_internal)
+
+
+def update_order_status(
+    session: Session, order_id: int, new_status: OrderStatus
+) -> Order:
+    order = order_crud.get_order_by_id(session, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Pedido não encontrado.")
+    if new_status in [OrderStatus.COMPLETED, OrderStatus.CANCELED]:
+        update_inventory_quantity(
+            session, order, is_cancellation=(new_status == OrderStatus.CANCELED)
+        )
+
+    return order_crud.update_order_status(session, order_id, new_status)
+
+
+def update_inventory_quantity(
+    session: Session, order: Order, is_cancellation: bool = False
+):
+    for item in order.items:
+        inventory = inventory_crud.get_inventory_by_product_and_unit(
+            session, item.product_id, order.unit_id
+        )
+        if inventory:
+            new_reserved = inventory.reserved_quantity - item.quantity
+            new_total = (
+                inventory.total_quantity
+                if is_cancellation
+                else inventory.total_quantity - item.quantity
+            )
+            inventory_crud.update_inventory(
+                session,
+                inventory.id,
+                InventoryUpdate(
+                    reserved_quantity=new_reserved, total_quantity=new_total
+                ),
+            )

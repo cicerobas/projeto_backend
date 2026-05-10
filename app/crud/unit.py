@@ -39,5 +39,5 @@ def get_unit_by_id(session: Session, unit_id: int) -> Unit | None:
     return session.get(Unit, unit_id)
 
 
-def get_all_units(session: Session) -> list[Unit]:
-    return session.exec(select(Unit)).all()
+def get_all_units(session: Session, offset: int = 0, limit: int = 10) -> list[Unit]:
+    return session.exec(select(Unit).offset(offset).limit(limit)).all()

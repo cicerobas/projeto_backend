@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.database import SessionDep
 from app.crud import unit as unit_crud
@@ -64,6 +64,8 @@ async def unit_read(unit_id: int, session: SessionDep):
 @router.get(
     "/", response_model=list[UnitRead], summary="Listar todas as unidades da rede"
 )
-async def unit_list(session: SessionDep):
-    units = unit_crud.get_all_units(session)
+async def unit_list(session: SessionDep, 
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=100),):
+    units = unit_crud.get_all_units(session, offset, limit)
     return units

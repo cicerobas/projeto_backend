@@ -41,5 +41,22 @@ def get_inventory_by_id(session: Session, inventory_id: int) -> Inventory | None
     return session.get(Inventory, inventory_id)
 
 
-def get_inventories_by_unit_id(session: Session, unit_id: int) -> list[Inventory]:
-    return session.exec(select(Inventory).where(Inventory.unit_id == unit_id)).all()
+def get_inventories_by_unit_id(
+    session: Session, unit_id: int, offset: int = 0, limit: int = 10
+) -> list[Inventory]:
+    return session.exec(
+        select(Inventory)
+        .where(Inventory.unit_id == unit_id)
+        .offset(offset)
+        .limit(limit)
+    ).all()
+
+
+def get_inventory_by_product_and_unit(
+    session: Session, product_id: int, unit_id: int
+) -> Inventory | None:
+    return session.exec(
+        select(Inventory).where(
+            Inventory.product_id == product_id, Inventory.unit_id == unit_id
+        )
+    ).first()
