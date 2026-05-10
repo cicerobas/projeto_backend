@@ -34,7 +34,7 @@ def check_order_items(session: Session, order_data: OrderCreateInternal):
         ):
             unit = unit_crud.get_unit_by_id(session, order_data.unit_id)
             raise HTTPException(
-                status_code=400,
+                status_code=409,
                 detail=f"Estoque insuficiente para o produto: {product.name} na unidade {unit.name}.",
             )
 

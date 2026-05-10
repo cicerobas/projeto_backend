@@ -54,6 +54,7 @@ def get_orders(
     session: SessionDep,
     order_channel: order_schemas.OrderChannel | None = Query(default=None),
     status: order_schemas.OrderStatus | None = Query(default=None),
+    current_user=Depends(require_roles("employee", "manager", "admin"))
 ):
     return order_crud.get_orders(session, order_channel, status)
 

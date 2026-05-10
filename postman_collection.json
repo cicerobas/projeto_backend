@@ -1,0 +1,874 @@
+{
+  "info": {
+    "_postman_id": "e4b8c02f-f47c-4c82-af0e-f49ee80d0139",
+    "name": "API Raizes do Nordeste - Testes",
+    "description": "Coleção de testes cobrindo autenticação, validação de dados, regras de negócio e pagamento mock.\n\n**Antes de rodar:**\n\n1. Preencha admin_password nas variáveis da coleção\n    \n2. Execute a pasta 'Setup' primeiro para popular os dados necessários\n    \n3. Execute as pastas A, B, C, D na ordem",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "17594530"
+  },
+  "item": [
+    {
+      "name": "Setup (rode antes dos testes)",
+      "item": [
+        {
+          "name": "Login admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login admin OK', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('admin_token', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "{{admin_email}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{admin_password}}"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "scope",
+                  "value": ""
+                },
+                {
+                  "key": "client_id",
+                  "value": ""
+                },
+                {
+                  "key": "client_secret",
+                  "value": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cadastrar cliente de teste",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cliente criado (201) ou já existe (409)', () => {",
+                  "    pm.expect([201, 409]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cliente Teste\",\n  \"email\": \"cliente.teste@email.com\",\n  \"password\": \"senha123\",\n  \"cpf\": \"00000000000\",\n  \"address\": \"Rua Teste, 1\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/customers/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "customers",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login cliente de teste",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login cliente OK', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('customer_token', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "cliente.teste@email.com"
+                },
+                {
+                  "key": "password",
+                  "value": "senha123"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "scope",
+                  "value": ""
+                },
+                {
+                  "key": "client_id",
+                  "value": ""
+                },
+                {
+                  "key": "client_secret",
+                  "value": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar unidade de teste",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Unidade criada', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('unit_id', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Unidade Teste\",\n  \"cnpj\": \"00000000000000\",\n  \"address\": \"Rua Teste, 1\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/units/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "units",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar produto de teste",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Produto criado', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('valid_product_id', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Produto Teste\",\n  \"price\": 10.00,\n  \"description\": \"Produto criado para testes automatizados\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar estoque para o produto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estoque criado', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unit_id\": {{unit_id}},\n  \"product_id\": {{valid_product_id}},\n  \"total_quantity\": 10,\n  \"reserved_quantity\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/inventories/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "inventories",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Cria os dados necessários para os testes de pedido. Execute esta pasta inteira antes das demais."
+    },
+    {
+      "name": "A) Autenticação e Autorização",
+      "item": [
+        {
+          "name": "A1 - Login válido → token retornado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 - Login bem sucedido', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Retorna access_token do tipo bearer', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.access_token).to.be.a('string');",
+                  "    pm.expect(json.token_type).to.eql('bearer');",
+                  "    pm.collectionVariables.set('admin_token', json.access_token);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "{{admin_email}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{admin_password}}"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "scope",
+                  "value": ""
+                },
+                {
+                  "key": "client_id",
+                  "value": ""
+                },
+                {
+                  "key": "client_secret",
+                  "value": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "A2 - Acesso sem token (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401 - Acesso negado sem token', () => {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "A3 - Acesso com perfil sem permissão (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403 - Acesso negado para perfil sem permissão', () => {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Produto Não Autorizado\",\n  \"price\": 5.00,\n  \"description\": \"Tentativa indevida\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "B) Validação de Dados",
+      "item": [
+        {
+          "name": "B1 - Campo obrigatório ausente (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 422 - Campo obrigatório ausente', () => {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "pm.test('Retorna detalhes do erro de validação', () => {",
+                  "    pm.expect(pm.response.json()).to.have.property('detail');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unit_id\": {{unit_id}},\n  \"payment_method\": \"mock\",\n  \"order_channel\": \"totem\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders/totem",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "totem"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "B2 - Quantidade negativa (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 422 - Valor inválido no campo quantity', () => {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "pm.test('Retorna detalhes do erro de validação', () => {",
+                  "    pm.expect(pm.response.json()).to.have.property('detail');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unit_id\": {{unit_id}},\n  \"payment_method\": \"mock\",\n  \"items\": [{ \"product_id\": {{valid_product_id}}, \"quantity\": -5 }],\n  \"order_channel\": \"totem\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders/totem",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "totem"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "C) Regras de Negócio",
+      "item": [
+        {
+          "name": "C1 - Pedido com itens válidos → criado (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 - Pedido criado com sucesso', () => {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Retorna id e status pending', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.id).to.exist;",
+                  "    pm.expect(json.status).to.eql('pending');",
+                  "    pm.collectionVariables.set('order_id', json.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unit_id\": {{unit_id}},\n  \"payment_method\": \"mock\",\n  \"items\": [{ \"product_id\": {{valid_product_id}}, \"quantity\": 1 }],\n  \"order_channel\": \"totem\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders/totem",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "totem"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "C2 - Pedido com produto inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404 - Produto não encontrado', () => {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unit_id\": {{unit_id}},\n  \"payment_method\": \"mock\",\n  \"items\": [{ \"product_id\": {{invalid_product_id}}, \"quantity\": 1 }],\n  \"order_channel\": \"totem\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders/totem",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "totem"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "C3 - Pedido com estoque insuficiente (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409 - Estoque insuficiente', () => {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unit_id\": {{unit_id}},\n  \"payment_method\": \"mock\",\n  \"items\": [{ \"product_id\": {{valid_product_id}}, \"quantity\": 99999 }],\n  \"order_channel\": \"totem\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders/totem",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "totem"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "D) Pagamento Mock",
+      "item": [
+        {
+          "name": "D1 - Processar pagamento mock (aprovado ou recusado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 - Pagamento processado pelo mock', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Resposta contém order_id e transaction_id', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.order_id).to.exist;",
+                  "    pm.expect(json.transaction_id).to.be.a('string');",
+                  "    pm.expect(json.status).to.be.a('string');",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "",
+                  "if (json.status === 'approved') {",
+                  "    pm.test('Pagamento APROVADO → status approved', () => {",
+                  "        pm.expect(json.status).to.eql('approved');",
+                  "        console.log('Pagamento aprovado. Status:', json.status);",
+                  "    });",
+                  "} else {",
+                  "    pm.test('Pagamento RECUSADO → status declined e payload presente', () => {",
+                  "        pm.expect(json.status).to.eql('declined');",
+                  "        pm.expect(json.payload).to.exist;",
+                  "        console.log('Pagamento recusado. Status:', json.status, '| Payload:', json.payload);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payments/:order_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                ":order_id"
+              ],
+              "variable": [
+                {
+                  "key": "order_id",
+                  "value": "{{order_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "D2 - Atualizar status do pedido após pagamento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 - Status do pedido atualizado', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Status do pedido é delivering', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.status).to.eql('delivering');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/orders/:order_id/status?new_status=delivering",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                ":order_id",
+                "status"
+              ],
+              "query": [
+                {
+                  "key": "new_status",
+                  "value": "delivering"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "order_id",
+                  "value": "{{order_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "admin_email",
+      "value": "admin@email.com"
+    },
+    {
+      "key": "admin_password",
+      "value": ""
+    },
+    {
+      "key": "admin_token",
+      "value": ""
+    },
+    {
+      "key": "customer_token",
+      "value": ""
+    },
+    {
+      "key": "unit_id",
+      "value": ""
+    },
+    {
+      "key": "valid_product_id",
+      "value": ""
+    },
+    {
+      "key": "invalid_product_id",
+      "value": "99999"
+    },
+    {
+      "key": "order_id",
+      "value": ""
+    }
+  ]
+}

@@ -129,6 +129,19 @@ Com a API no ar, acesse:
 | ReDoc | [http://localhost:8000/redoc](http://localhost:8000/redoc) |
 
 ---
+## 7. Testes
+
+Importe o arquivo `Testes.postman_collection.json` no Postman e execute via **Collection Runner**.
+
+**Antes de rodar:**
+
+1. Preencha admin_password nas variáveis da coleção
+    
+2. Execute a pasta 'Setup' primeiro para popular os dados necessários
+    
+3. Execute as pastas A, B, C, D na ordem
+
+As demais rotas podem ser acessadas e testadas em [http://localhost:8000/docs](http://localhost:8000/docs).
 
 ## Estrutura do projeto
 
