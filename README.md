@@ -131,7 +131,7 @@ Com a API no ar, acesse:
 ---
 ## 7. Testes
 
-Importe o arquivo `Testes.postman_collection.json` no Postman e execute via **Collection Runner**.
+Importe o arquivo `postman_collection.json` no Postman e execute via **Collection Runner**.
 
 **Antes de rodar:**
 
