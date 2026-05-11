@@ -760,9 +760,9 @@
                   "pm.test('Status 200 - Status do pedido atualizado', () => {",
                   "    pm.response.to.have.status(200);",
                   "});",
-                  "pm.test('Status do pedido é delivering', () => {",
+                  "pm.test('Status do pedido é processing', () => {",
                   "    const json = pm.response.json();",
-                  "    pm.expect(json.status).to.eql('delivering');",
+                  "    pm.expect(json.status).to.eql('processing');",
                   "});"
                 ]
               }
@@ -781,7 +781,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/orders/:order_id/status?new_status=delivering",
+              "raw": "{{baseUrl}}/orders/:order_id/status?new_status=processing",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -793,7 +793,7 @@
               "query": [
                 {
                   "key": "new_status",
-                  "value": "delivering"
+                  "value": "processing"
                 }
               ],
               "variable": [
